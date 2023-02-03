@@ -3,7 +3,7 @@
 int main(int argc, char** argv)
 {
 	char* code = " \
-		buffer test	\
+		buffertest	\
 		{\
 			int test;\
 		}\
@@ -11,6 +11,6 @@ int main(int argc, char** argv)
 
 
 	InitTokenTypes();
-	ReadBuffers(code);
+	SumLexin(code);
 	FreeTokens();
 }

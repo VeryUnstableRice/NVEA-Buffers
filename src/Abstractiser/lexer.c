@@ -29,6 +29,11 @@ bool IsDigit(char character)
 	return character >= '0' && character <= '9';
 }
 
+bool IsWhitespace(char character)
+{
+	return character == ' ' || character == '\t' || character == '\n';
+}
+
 void SumLexin(const char* code)
 {
 	static char tokens[MAX_TOKENS][MAX_TOKENS_LEN];
@@ -38,15 +43,15 @@ void SumLexin(const char* code)
 	int index = 0;
 	while (true)
 	{
-		while (code[index] == ' ' || code[index] == '\t' || code[index] == '\n') {
-			index++;
-		}
+		while (IsWhitespace(code[index]))index++;
 
 		for (int i = 0; i < token_count; ++i)
 		{
 			int lenght = strlen(types[i]->text);
 			if (strncmp(&code[index], types[i]->text, lenght) == 0)
 			{
+				if (!IsWhitespace(code[index + strlen(types[i]->text)])) break;
+
 				strncpy(tokens[token_num], types[i]->text, lenght);
 				index += lenght;
 				goto endofloop;
@@ -56,14 +61,15 @@ void SumLexin(const char* code)
 		if (IsLetter(code[index]))
 		{
 			int start = index;
-			int j = 0;
-			while (IsLetter(code[index]) || IsDigit(code[index]))
-			{
-				tokens[token_num][j++] = code[index];
-				++index;
-			}
-			tokens[token_num][j] = 0;
+			while (IsLetter(code[index]) || IsDigit(code[index])) ++index;
+			strncpy(tokens[token_num], &code[start], index - start);
+
 			goto endofloop;
+		}
+
+		for (int i = 0; i < token_num; ++i)
+		{
+			printf("%s\n", tokens[i]);
 		}
 		return;
 
@@ -78,13 +84,13 @@ void InitToken(const char* text, enum EToken type);
 void InitTokenTypes()
 {
 	token_count = 0;
-	InitToken("buffer"	, Identifier	, false);
-	InitToken("{"		, OpenBracket	, true);
-	InitToken("}"		, CloseBracket	, true);
-	InitToken(";"		, SemiColon		, true);
+	InitToken("buffer"	, Identifier	);
+	InitToken("{"		, OpenBracket	);
+	InitToken("}"		, CloseBracket	);
+	InitToken(";"		, SemiColon		);
 }
 
-void InitToken(const char* text, enum EToken type, bool substring)
+void InitToken(const char* text, enum EToken type)
 {
 	//alocate the token
 	types[token_count] = (struct STokenType*)malloc(sizeof(struct STokenType));
@@ -93,7 +99,6 @@ void InitToken(const char* text, enum EToken type, bool substring)
 	strcpy_s(types[token_count]->text, strlen(text) + 1, text);
 	//setting type
 	types[token_count]->type = type;
-	types[token_count]->substring = substring;
 	//increasing count
 	++token_count;
 }

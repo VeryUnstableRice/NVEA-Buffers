@@ -19,13 +19,15 @@ struct STokenType
 {
 	char* text;
 	enum EToken type;
-	bool substring;
 };
 
-void ReadBuffers(const char* code);
+struct SToken
+{
+	struct STokenType* type;
+};
 
 void InitTokenTypes();
-void SumLexin();
+void SumLexin(const char* code);
 
 extern struct STokenType* types[100];
 extern int token_count;
