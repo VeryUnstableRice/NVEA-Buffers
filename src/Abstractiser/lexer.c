@@ -36,7 +36,8 @@ bool IsWhitespace(char character)
 
 void SumLexin(const char* code)
 {
-	static char tokens[MAX_TOKENS][MAX_TOKENS_LEN];
+	//static char tokens[MAX_TOKENS][MAX_TOKENS_LEN];
+	static struct SToken tokens[MAX_TOKENS];
 
 	int token_num = 0;
 
@@ -52,8 +53,10 @@ void SumLexin(const char* code)
 			{
 				if (!IsWhitespace(code[index + strlen(types[i]->text)])) break;
 
-				strncpy(tokens[token_num], types[i]->text, lenght);
+				strncpy(tokens[token_num].code, types[i]->text, lenght);
+				tokens[token_num].type = types[i];
 				index += lenght;
+
 				goto endofloop;
 			}
 		}
@@ -62,14 +65,14 @@ void SumLexin(const char* code)
 		{
 			int start = index;
 			while (IsLetter(code[index]) || IsDigit(code[index])) ++index;
-			strncpy(tokens[token_num], &code[start], index - start);
-
+			strncpy(tokens[token_num].code, &code[start], index - start);
+			tokens[token_num].type = NULL;
 			goto endofloop;
 		}
 
 		for (int i = 0; i < token_num; ++i)
 		{
-			printf("%s\n", tokens[i]);
+			printf("%s\n", tokens[i].code);
 		}
 		return;
 

@@ -24,6 +24,7 @@ struct STokenType
 struct SToken
 {
 	struct STokenType* type;
+	char code[MAX_TOKENS_LEN];
 };
 
 void InitTokenTypes();
