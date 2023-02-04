@@ -2,17 +2,19 @@
 #define abstractiser_header
 #include <stdbool.h>
 
-#define MAX_TOKENS 100
+#define MAX_TOKENS 1000
 #define MAX_TOKENS_LEN 100
 
 
 enum ETokenType
 {
 	Type,
+	Struct,
 	Identifier,
 	OpenBracket,
 	CloseBracket,
-	SemiColon
+	SemiColon,
+	VariableName
 };
 
 struct STokenType
@@ -28,7 +30,9 @@ struct SToken
 };
 
 void InitTokenTypes();
-void SumLexin(const char* code);
+
+void Abstractise(const char* code);
+
 
 extern struct STokenType* types[100];
 extern int token_count;

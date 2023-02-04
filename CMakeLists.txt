@@ -10,4 +10,4 @@ set(CMAKE_C_STANDARD 99)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 
-add_executable(BUFFERS "SRC/main.c" "SRC/Abstractiser/lexer.c")
+add_executable(BUFFERS "src/main.c" "src/Abstractiser/lexer.c" "src/Abstractiser/struct.c")

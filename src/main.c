@@ -3,7 +3,7 @@
 int main(int argc, char** argv)
 {
 	char* code = " \
-		buffertest	\
+		struct test	\
 		{\
 			int test;\
 		}\
@@ -11,6 +11,6 @@ int main(int argc, char** argv)
 
 
 	InitTokenTypes();
-	SumLexin(code);
+	Abstractise(code);
 	FreeTokens();
 }
