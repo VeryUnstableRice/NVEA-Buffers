@@ -4,6 +4,7 @@
 
 #define MAX_TOKENS 1000
 #define MAX_TOKENS_LEN 100
+#define MAX_STRUCTURES 100
 
 
 enum ETokenType
@@ -26,12 +27,19 @@ struct STokenType
 struct SToken
 {
 	struct STokenType* type;
-	char code[MAX_TOKENS_LEN];
+	char *code;
+};
+
+struct SCodeData
+{
+	struct SToken tokens[MAX_TOKENS];
+	struct SStruct* structures[MAX_STRUCTURES];
+	int struct_num, token_num;
 };
 
 void InitTokenTypes();
 
-void Abstractise(const char* code);
+void Abstractise(const char* code, struct SCodeData* codeData);
 
 
 extern struct STokenType* types[100];

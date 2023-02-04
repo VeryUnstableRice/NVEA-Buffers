@@ -13,7 +13,7 @@ struct SStruct* CreateStruct(char* name)
 	struct SStruct* output = malloc(sizeof(struct SStruct));
 	//strcpy(output->name, name);
 	output->PropertyNum = 0;
-	strcpy_s(output->name, 100, name);
+	output->name = strdup(name);
 	return output;
 }
 
@@ -21,5 +21,6 @@ void DeleteStruct(struct SStruct* object)
 {
 	for (int i = 0; i < object->PropertyNum; ++i)
 		free(object->Properties[i]);
+	free(object->name);
 	free(object);
 }

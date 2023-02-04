@@ -5,7 +5,7 @@ extern struct SStruct* IntPrimitive;
  
 struct SStruct
 {
-	char name[100];
+	char *name;
 	struct SStruct* Properties[100];
 	int PropertyNum;
 };
