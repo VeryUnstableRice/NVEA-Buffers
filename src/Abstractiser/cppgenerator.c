@@ -18,7 +18,7 @@ void GenerateCPPFiles(const char* path, struct SCodeData* data)
 	InitBuffer(&cpp_buffer);
 
 	GenerateHeaderData(&header_buffer	, data);
-	GenerateHeaderData(&cpp_buffer		, data);
+	GenerateCPPData(&cpp_buffer		, data);
 
 	char* path_to_header = GeneratePath(path, "generated.h");
 	char* path_to_cpp	 = GeneratePath(path, "generated.cpp");
@@ -55,6 +55,8 @@ void PutDataToFile(const char* code, char* path)
 
 void GenerateHeaderData(struct SBuffer* buffer, const struct SCodeData* data)
 {
+	AppendToBuffer(buffer, "#include <stddef.h>\n");
+
 	//generating the structure itself
 	for (int i = 0; i < data->struct_num; ++i)
 	{
@@ -80,10 +82,25 @@ void GenerateHeaderData(struct SBuffer* buffer, const struct SCodeData* data)
 
 
 		//reflection code
-		AppendToBuffer(buffer, "class ");
+		AppendToBuffer(buffer, "private: static class ");
 		AppendToBuffer(buffer, current->name);
-		AppendToBuffer(buffer, "_class { virtual void Init() override { ");
+		AppendToBuffer(buffer, "_class { virtual void Init() override { ");\
+		for (int j = 0; j < current->property_num; ++j)
+		{
+			struct SProperty* property = current->properties[j];
+			AppendToBuffer(buffer, "AddToReflection(\"");
+			AppendToBuffer(buffer, property->type->name);
+			AppendToBuffer(buffer, "\",offsetof(class ");
+			AppendToBuffer(buffer, current->name);
+			AppendToBuffer(buffer, ",");
+			AppendToBuffer(buffer, property->name);
+			AppendToBuffer(buffer, ");");
+		}
+		AppendToBuffer(buffer, "}");
+		AppendToBuffer(buffer, "}class_type;");
 
+		AppendToBuffer(buffer, "static CClass* StructInfo() { return class_type; }");
+		AppendToBuffer(buffer, "virtual CClass* GetClass() const override { return StructInfo(); }");
 
 		AppendToBuffer(buffer, "virtual std::uint64 GetTypeID() override { return ");
 

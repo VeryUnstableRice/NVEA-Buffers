@@ -1,1 +1,2 @@
-class example_structure : CObject {public:int example_int; float example_float; class example_structure_classvirtual std::uint64 GetTypeID() override { return 2;}}
+#include <stddef.h>
+class example_structure : CObject {public:int example_int; float example_float; private: static class example_structure_class { virtual void Init() override { AddToReflection("int",offsetof(class example_structure,example_int);AddToReflection("float",offsetof(class example_structure,example_float);}}class_type;static CClass* StructInfo() { return class_type; }virtual CClass* GetClass() const override { return StructInfo(); }virtual std::uint64 GetTypeID() override { return 2;}}
