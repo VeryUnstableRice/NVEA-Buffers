@@ -9,7 +9,7 @@
 
 enum ETokenType
 {
-	Type,
+	type,
 	Struct,
 	Identifier,
 	OpenBracket,
@@ -37,7 +37,7 @@ struct SCodeData
 	int struct_num, token_num;
 };
 
-void InitTokenTypes();
+void InitTokenTypes(struct SCodeData* codeData);
 
 void Abstractise(const char* code, struct SCodeData* codeData);
 

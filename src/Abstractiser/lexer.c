@@ -10,8 +10,6 @@ int token_count;
 
 
 struct STokenType* VariableNameToken = NULL;
-struct STokenType* IntToken = NULL;
-struct STokenType* FloatToken = NULL;
 struct STokenType* StructToken = NULL;
 struct STokenType* OpenBraketToken = NULL;
 struct STokenType* CloseBraketToken = NULL;
@@ -33,6 +31,9 @@ void FlagError(char* token, char* expected)
 void SumLexin(const char* code, int* token_num, struct SToken(*tokens)[MAX_TOKENS]);
 void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* structures[], int* struct_num);
 void PrintTokens(const int* token_num, struct SToken(*tokens)[MAX_TOKENS]);
+void AddStruct(struct SCodeData* codeData, struct SStruct* object);
+
+struct STokenType* InitToken(const char* text, enum EToken type);
 
 void Abstractise(const char* code, struct SCodeData* codeData)
 {	
@@ -46,6 +47,13 @@ void PrintTokens(const int* token_num, struct SToken(*tokens)[MAX_TOKENS])
 	{
 		printf("Token: %s\n", (*tokens)[i].code);
 	}
+}
+
+void AddStruct(struct SCodeData* codeData, struct SStruct* object)
+{
+	codeData->structures[codeData->struct_num] = object;
+	InitToken(object->name, Identifier);
+	++codeData->struct_num;
 }
 
 //todo: memory management
@@ -72,7 +80,8 @@ void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* 
 	enum EProcessingStage tree_stage = None;
 
 	struct SStruct* root_structure = NULL;
-	struct SStruct* variable = NULL;
+	struct SProperty* variable = NULL;
+	struct SStruct* variable_type = NULL;
 	for (;current_token < *token_num; ++current_token)
 	{
 		struct SToken* current = tokens + current_token;
@@ -91,7 +100,7 @@ void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* 
 		{
 			if (current->type->type == VariableName)
 			{
-				root_structure = CreateStruct(current->code);
+				root_structure = CreateStruct(current->code, true);
 				tree_stage = StructureNamedEstablished;
 				continue;
 			}
@@ -112,10 +121,24 @@ void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* 
 
 		if (tree_stage == ConstructingStruct)
 		{
+
+			//finding the property type
 			if (current->type->type == Identifier)
 			{
 				tree_stage = ConstructingIdentifier;
+				variable_type = NULL;
+				for (int i = 0; i < *struct_num; ++i)
+				{
+					if (strcmp(structures[i]->name, current->code) == 0)
+					{
+						variable_type = structures[i];
+						break;
+					}
+				}
+
 				//todo remember identifier type
+				if(!variable_type)
+					FlagError(current->code, "a declared structure");
 				continue;
 			}
 			if (current->type->type == CloseBracket)
@@ -135,7 +158,7 @@ void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* 
 			if (current->type->type == VariableName)
 			{
 				tree_stage = FinishingVariableDecl;
-				variable = CreateStruct(current->code);
+				variable = CreateProperty(current->code, variable_type);
 				continue;
 			}
 			FlagError(current->code, "a variable name");
@@ -149,6 +172,7 @@ void ProcessTokens(const int* token_num, struct SToken* tokens, struct SStruct* 
 				tree_stage = ConstructingStruct;
 				AddProperty(root_structure, variable);
 				variable = NULL;
+				variable_type = NULL;
 				continue;
 			}
 			FlagError(current->code, "a semicolon");
@@ -212,18 +236,18 @@ void SumLexin(const char* code, int* token_num, struct SToken(*tokens)[MAX_TOKEN
 }
 
 //init tokens
-struct STokenType* InitToken(const char* text, enum EToken type);
 
-void InitTokenTypes()
+void InitTokenTypes(struct SCodeData* codeData)
 {
 	token_count = 0;
 	StructToken			= InitToken("struct"	, Struct		);
-	IntToken			= InitToken("int"		, Identifier	);
-	FloatToken			= InitToken("float"		, Identifier	);
 	OpenBraketToken		= InitToken("{"			, OpenBracket	);
 	CloseBraketToken	= InitToken("}"			, CloseBracket	);
 	SemicolonToken		= InitToken(";"			, SemiColon		);
 	VariableNameToken	= InitToken(NULL		, VariableName  );
+
+	AddStruct(codeData, CreateStruct("float", false));
+	AddStruct(codeData, CreateStruct("int", false));
 }
 
 struct STokenType* InitToken(const char* text, enum EToken type)

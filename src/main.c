@@ -2,15 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Abstractiser/lexer.h"
+#include "Abstractiser/struct.h"
+#include "Abstractiser/cppgenerator.h"
 
 
 char help[] =
 "-cpp -> produces code for c++ \n\
--f -> \"/path/to/file\"\n\
+-f -> \"/path/to/input\"\n\
+-o -> \"path/to/output\"\n\
 -h -> help\n\
 ";
 
 int fakemain(int argc, char** argv);
+char* GetCodeFromFile(FILE* file);
 
 int main(int argc, char** argv)
 {
@@ -22,7 +26,7 @@ int main(int argc, char** argv)
 		"C:\\Users\\Truncated\\source\\repos\\NVEABuffers\\example.nveab"
 	};
 
-	fakemain(4, tempargc);
+	return fakemain(4, tempargc);
 }
 
 int fakemain(int argc, char** argv)
@@ -80,29 +84,51 @@ int fakemain(int argc, char** argv)
 		}
 	}
 
-	if (!file)
+	if (!file || language == LT_None)
 	{
-		return;
+		return 1;
 	}
 
+	//reading the code from file to char array
+	char* code = GetCodeFromFile(file);
+
+	//turning the code into abstracted data
+
+	//initialising data
+	struct SCodeData codeData;
+	memset(&codeData, 0, sizeof codeData);
+
+	InitTokenTypes(&codeData);
+
+	Abstractise(code, &codeData);
+	
+	//turning the abstracted data into generated code
+	switch (language)
+	{
+	case LT_CPP:
+		GenerateCPPFiles("C:\\Users\\Truncated\\source\\repos\\NVEABuffers\\example", &codeData);
+		break;
+	}
+	
+	//freeing memory
+	free(code);
+	for (int i = 0; i < codeData.token_num; ++i)
+		free(codeData.tokens[i].code);
+	for (int i = 0; i < codeData.struct_num; ++i)
+		free(codeData.structures[i]);
+	FreeTokens();
+	return 0;
+}
+
+char* GetCodeFromFile(FILE* file)
+{
 	char* code = NULL;
 	fseek(file, 0, SEEK_END);
 	int file_size = ftell(file);
 	rewind(file);
-	//fseek(file, 0, SEEK_SET);
 
 	code = malloc(file_size * sizeof(char));
 	fread(code, sizeof(char), file_size, file);
 	fclose(file);
-
-	InitTokenTypes();
-	struct SCodeData codeData;
-	memset(&codeData, 0, sizeof codeData);
-	Abstractise(code, &codeData);
-	free(code);
-	for (int i = 0; i < codeData.token_num; ++i)
-	{
-		free(codeData.tokens[i].code);
-	}
-	FreeTokens();
+	return code;
 }

@@ -1,0 +1,1 @@
+struct example_structure{int example_int; float example_float; }
