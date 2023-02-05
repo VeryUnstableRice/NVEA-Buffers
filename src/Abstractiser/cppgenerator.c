@@ -58,14 +58,17 @@ void GenerateHeaderData(struct SBuffer* buffer, const struct SCodeData* data)
 	//generating the structure itself
 	for (int i = 0; i < data->struct_num; ++i)
 	{
+		//normal struct things
 		struct SStruct* current = data->structures[i];
 		
 		if (!current->generate_code) continue;
 
-		AppendToBuffer(buffer, "struct ");
+		AppendToBuffer(buffer, "class ");
 		AppendToBuffer(buffer, current->name);
+		AppendToBuffer(buffer, " : CObject ");
 		AppendToBuffer(buffer, "{");
 
+		AppendToBuffer(buffer, "public:");
 		for (int j = 0; j < current->property_num; ++j)
 		{
 			struct SProperty *property = current->properties[j];
@@ -75,10 +78,25 @@ void GenerateHeaderData(struct SBuffer* buffer, const struct SCodeData* data)
 			AppendToBuffer(buffer, "; ");
 		}
 
-		AppendToBuffer(buffer, "}");
-	}
 
-	//generating the reflexion code
+		//reflection code
+		AppendToBuffer(buffer, "class ");
+		AppendToBuffer(buffer, current->name);
+		AppendToBuffer(buffer, "_class { virtual void Init() override { ");
+
+
+		AppendToBuffer(buffer, "virtual std::uint64 GetTypeID() override { return ");
+
+		char IDStr[5];
+		sprintf(IDStr, "%d", i);
+		AppendToBuffer(buffer, IDStr);
+		AppendToBuffer(buffer, ";}");
+
+
+
+		AppendToBuffer(buffer, "}");
+		AppendToBuffer(buffer, "\n");
+	}
 }
 
 void GenerateCPPData(struct SBuffer* buffer, const struct SCodeData* data)
